@@ -163,3 +163,23 @@ export async function updateMilestoneValue(value: number): Promise<{ success: bo
     return { success: false, message: "Failed to update milestone value" }
   }
 }
+
+// Increase milestone current value
+export async function increaseMilestoneValue(value: number): Promise<{ success: boolean; message: string }> {
+  if (isNaN(value)) {
+    return { success: false, message: "Invalid value" }
+  }
+
+  try {
+    await sql`
+      UPDATE milestone_settings
+      SET current_value = current_value + (${value})
+      WHERE id = (SELECT id FROM milestone_settings LIMIT 1)
+    `
+    revalidatePath("/")
+    return { success: true, message: "Milestone value updated successfully" }
+  } catch (error) {
+    console.error("Failed to update milestone value:", error)
+    return { success: false, message: "Failed to update milestone value" }
+  }
+}

@@ -11,9 +11,10 @@ interface MilestoneProgressProps {
   value: number
   maxValue: number
   isParentMode: boolean
+  onUpdate?: (newValue: number, newMaxValue: number) => void  // Add this new prop
 }
 
-export function MilestoneProgress({ value, maxValue, isParentMode }: MilestoneProgressProps) {
+export function MilestoneProgress({ value, maxValue, isParentMode, onUpdate }: MilestoneProgressProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [newGoal, setNewGoal] = useState(maxValue.toString())
   const [newValue, setNewValue] = useState(value.toString())
@@ -27,9 +28,12 @@ export function MilestoneProgress({ value, maxValue, isParentMode }: MilestonePr
     setMessage(null)
 
     try {
+      const newGoalValue = Number.parseInt(newGoal)
+      const newCurrentValue = Number.parseInt(newValue)
+      
       // Update goal if changed
-      if (Number.parseInt(newGoal) !== maxValue) {
-        const goalResult = await updateMilestoneGoal(Number.parseInt(newGoal))
+      if (newGoalValue !== maxValue) {
+        const goalResult = await updateMilestoneGoal(newGoalValue)
         if (!goalResult.success) {
           setMessage({ type: "error", text: goalResult.message })
           setIsUpdating(false)
@@ -38,8 +42,8 @@ export function MilestoneProgress({ value, maxValue, isParentMode }: MilestonePr
       }
 
       // Update value if changed
-      if (Number.parseInt(newValue) !== value) {
-        const valueResult = await updateMilestoneValue(Number.parseInt(newValue))
+      if (newCurrentValue !== value) {
+        const valueResult = await updateMilestoneValue(newCurrentValue)
         if (!valueResult.success) {
           setMessage({ type: "error", text: valueResult.message })
           setIsUpdating(false)
@@ -50,7 +54,11 @@ export function MilestoneProgress({ value, maxValue, isParentMode }: MilestonePr
       setMessage({ type: "success", text: "Milestone updated successfully" })
       setIsEditing(false)
 
-      // Message will disappear after 3 seconds
+      // Call the onUpdate callback with new values
+      if (onUpdate) {
+        onUpdate(newCurrentValue, newGoalValue)
+      }
+
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
       setMessage({ type: "error", text: "Failed to update milestone" })

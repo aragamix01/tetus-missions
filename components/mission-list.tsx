@@ -12,6 +12,7 @@ import {
   toggleMissionCompletion,
   getMissionStats,
   getMilestoneSettings,
+  increaseMilestoneValue,
 } from "@/app/actions"
 import { PinDialog } from "./pin-dialog"
 import { MilestoneProgress } from "./milestone-progress"
@@ -77,18 +78,22 @@ export function MissionList() {
     )
 
     // Update stats optimistically
+    let point = 0
     const missionToToggle = missions.find((m) => m.id === id)
     if (missionToToggle) {
-      const point = missionToToggle.stars * 10
+      point = missionToToggle.stars * 10
       if (missionToToggle.completed) {
-        setStats({ ...stats, completed: stats.completed - point, total: TOTAL_POINT })
+        setStats({completed: stats.completed - point, total: TOTAL_POINT })
       } else {
-        setStats({ ...stats, completed: stats.completed + point, total: TOTAL_POINT })
+        setStats({completed: stats.completed + point, total: TOTAL_POINT })
+        setMilestoneStats({...milestoneStats, currentValue: milestoneStats.currentValue + point})
       }
     }
 
     // Send to server
     await toggleMissionCompletion(id)
+    console.log(point)
+    await increaseMilestoneValue(point)
   }
 
   const handleDeleteMission = (id: number) => {
@@ -125,6 +130,14 @@ export function MissionList() {
     setIsExitMode(true)
   }
 
+  const handleMilestoneUpdate = (newValue: number, newMaxValue: number) => {
+    setMilestoneStats({
+      currentValue: newValue,
+      totalGoal: newMaxValue,
+    })
+  }
+
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-10">
@@ -151,6 +164,7 @@ export function MissionList() {
         value={milestoneStats.currentValue}
         maxValue={milestoneStats.totalGoal}
         isParentMode={isParentMode}
+        onUpdate={handleMilestoneUpdate}
       />
 
       <div className="flex justify-between items-center mb-6">
