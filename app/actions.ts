@@ -68,6 +68,21 @@ export async function toggleMissionCompletion(id: number): Promise<{ success: bo
   }
 }
 
+// Delete a mission
+export async function deleteMission(id: number): Promise<{ success: boolean; message: string }> {
+  try {
+    await sql`
+      DELETE FROM missions
+      WHERE id = ${id}
+    `
+    revalidatePath("/")
+    return { success: true, message: "Mission deleted successfully" }
+  } catch (error) {
+    console.error("Failed to delete mission:", error)
+    return { success: false, message: "Failed to delete mission" }
+  }
+}
+
 // Get mission completion stats
 export async function getMissionStats(): Promise<{ completed: number; total: number }> {
   try {

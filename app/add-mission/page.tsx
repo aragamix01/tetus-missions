@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,9 @@ import Link from "next/link"
 import { StarSelector } from "@/components/star-selector"
 import { addMission } from "@/app/actions"
 
+// Key for localStorage
+const PARENT_MODE_KEY = "kids_mission_parent_mode"
+
 export default function AddMissionPage() {
   const router = useRouter()
   const [title, setTitle] = useState("")
@@ -21,6 +24,18 @@ export default function AddMissionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<{ title?: string; description?: string }>({})
   const [formMessage, setFormMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [isParentMode, setIsParentMode] = useState(false)
+
+  // Check if parent mode is active on component mount
+  useEffect(() => {
+    const parentMode = localStorage.getItem(PARENT_MODE_KEY) === "true"
+    setIsParentMode(parentMode)
+
+    // If not in parent mode, redirect back to home
+    if (!parentMode) {
+      router.push("/")
+    }
+  }, [router])
 
   const validateForm = () => {
     const newErrors: { title?: string; description?: string } = {}
@@ -60,6 +75,7 @@ export default function AddMissionPage() {
       if (result.success) {
         setFormMessage({ type: "success", text: result.message })
         // Redirect back to home page after a short delay
+        // Parent mode will be preserved because it's in localStorage
         setTimeout(() => {
           router.push("/")
           router.refresh()
@@ -73,6 +89,17 @@ export default function AddMissionPage() {
       setFormMessage({ type: "error", text: "An unexpected error occurred" })
       setIsSubmitting(false)
     }
+  }
+
+  // If not in parent mode and still loading, show loading state
+  if (!isParentMode && typeof window !== "undefined") {
+    return (
+      <main className="min-h-screen bg-gray-950 text-white p-4 md:p-8">
+        <div className="flex justify-center items-center h-[50vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      </main>
+    )
   }
 
   return (
