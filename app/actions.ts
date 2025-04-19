@@ -91,7 +91,7 @@ export async function getMissionStats(): Promise<{ completed: number; total: num
         SUM(stars) FILTER (WHERE completed = true) as completed
       FROM missions
     `
-    
+
     return {
       completed: Number.parseInt(result[0].completed as string) * 10 || 0,
       total: 100,
@@ -99,5 +99,67 @@ export async function getMissionStats(): Promise<{ completed: number; total: num
   } catch (error) {
     console.error("Failed to get mission stats:", error)
     return { completed: 0, total: 0 }
+  }
+}
+
+// Get milestone settings
+export async function getMilestoneSettings(): Promise<{ totalGoal: number; currentValue: number }> {
+  try {
+    const result = await sql`
+      SELECT total_goal, current_value FROM milestone_settings LIMIT 1
+    `
+
+    if (result.length === 0) {
+      // If no settings exist, return defaults
+      return { totalGoal: 100, currentValue: 0 }
+    }
+
+    return {
+      totalGoal: Number(result[0].total_goal),
+      currentValue: Number(result[0].current_value),
+    }
+  } catch (error) {
+    console.error("Failed to get milestone settings:", error)
+    return { totalGoal: 100, currentValue: 0 }
+  }
+}
+
+// Update milestone goal
+export async function updateMilestoneGoal(goal: number): Promise<{ success: boolean; message: string }> {
+  if (isNaN(goal) || goal <= 0) {
+    return { success: false, message: "Invalid goal value" }
+  }
+
+  try {
+    await sql`
+      UPDATE milestone_settings
+      SET total_goal = ${goal}
+      WHERE id = (SELECT id FROM milestone_settings LIMIT 1)
+    `
+    revalidatePath("/")
+    return { success: true, message: "Milestone goal updated successfully" }
+  } catch (error) {
+    console.error("Failed to update milestone goal:", error)
+    return { success: false, message: "Failed to update milestone goal" }
+  }
+}
+
+// Update milestone current value
+export async function updateMilestoneValue(value: number): Promise<{ success: boolean; message: string }> {
+  if (isNaN(value) || value < 0) {
+    return { success: false, message: "Invalid value" }
+  }
+
+  try {
+    await sql`
+      UPDATE milestone_settings
+      SET current_value = ${value}
+      WHERE id = (SELECT id FROM milestone_settings LIMIT 1)
+    `
+    revalidatePath("/")
+    return { success: true, message: "Milestone value updated successfully" }
+  } catch (error) {
+    console.error("Failed to update milestone value:", error)
+    return { success: false, message: "Failed to update milestone value" }
   }
 }

@@ -6,8 +6,15 @@ import { ProgressBar } from "./progress-bar"
 import { Button } from "@/components/ui/button"
 import { PlusCircle, Settings, X } from "lucide-react"
 import Link from "next/link"
-import { type Mission, getMissions, toggleMissionCompletion, getMissionStats } from "@/app/actions"
+import {
+  type Mission,
+  getMissions,
+  toggleMissionCompletion,
+  getMissionStats,
+  getMilestoneSettings,
+} from "@/app/actions"
 import { PinDialog } from "./pin-dialog"
+import { MilestoneProgress } from "./milestone-progress"
 
 // Static PIN for parent access
 const PARENT_PIN = "9160"
@@ -19,6 +26,7 @@ const TOTAL_POINT = 100
 export function MissionList() {
   const [missions, setMissions] = useState<Mission[]>([])
   const [stats, setStats] = useState({ completed: 0, total: TOTAL_POINT })
+  const [milestoneStats, setMilestoneStats] = useState({ currentValue: 0, totalGoal: 100 })
   const [isLoading, setIsLoading] = useState(true)
   const [isPinDialogOpen, setIsPinDialogOpen] = useState(false)
   const [isParentMode, setIsParentMode] = useState(false)
@@ -33,6 +41,10 @@ export function MissionList() {
 
         const missionStats = await getMissionStats()
         setStats(missionStats)
+
+        // Fetch milestone settings
+        const milestoneData = await getMilestoneSettings()
+        setMilestoneStats(milestoneData)
 
         // Check if parent mode is active in localStorage
         const parentMode = localStorage.getItem(PARENT_MODE_KEY) === "true"
@@ -63,11 +75,11 @@ export function MissionList() {
     setMissions(
       missions.map((mission) => (mission.id === id ? { ...mission, completed: !mission.completed } : mission)),
     )
-    
+
     // Update stats optimistically
     const missionToToggle = missions.find((m) => m.id === id)
     if (missionToToggle) {
-      let point = missionToToggle.stars * 10
+      const point = missionToToggle.stars * 10
       if (missionToToggle.completed) {
         setStats({ ...stats, completed: stats.completed - point, total: TOTAL_POINT })
       } else {
@@ -133,6 +145,13 @@ export function MissionList() {
 
       {/* Progress Bar */}
       <ProgressBar value={stats.completed} maxValue={stats.total} />
+
+      {/* Milestone Progress Bar */}
+      <MilestoneProgress
+        value={milestoneStats.currentValue}
+        maxValue={milestoneStats.totalGoal}
+        isParentMode={isParentMode}
+      />
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Your Missions</h2>
