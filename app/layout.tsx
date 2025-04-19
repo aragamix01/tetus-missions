@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Kids Mission Tracker",
+  title: "Tetus Mission Tracker",
   description: "Track missions and earn stars!",
     generator: 'v0.dev'
 }
