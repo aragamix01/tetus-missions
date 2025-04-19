@@ -20,7 +20,7 @@ export type Mission = {
 export async function getMissions(): Promise<Mission[]> {
   try {
     const missions = await sql<Mission[]>`
-      SELECT * FROM missions ORDER BY stars ASC
+      SELECT * FROM missions ORDER BY stars ASC, title ASC
     `
     return missions
   } catch (error) {
