@@ -14,12 +14,15 @@ const PARENT_PIN = "9160"
 // Key for localStorage
 const PARENT_MODE_KEY = "kids_mission_parent_mode"
 
+const TOTAL_POINT = 100
+
 export function MissionList() {
   const [missions, setMissions] = useState<Mission[]>([])
-  const [stats, setStats] = useState({ completed: 0, total: 0 })
+  const [stats, setStats] = useState({ completed: 0, total: TOTAL_POINT })
   const [isLoading, setIsLoading] = useState(true)
   const [isPinDialogOpen, setIsPinDialogOpen] = useState(false)
   const [isParentMode, setIsParentMode] = useState(false)
+  const [isExit, setIsExitMode] = useState(false)
 
   // Load missions from database and check parent mode on component mount
   useEffect(() => {
@@ -49,8 +52,9 @@ export function MissionList() {
   useEffect(() => {
     if (isParentMode) {
       localStorage.setItem(PARENT_MODE_KEY, "true")
-    } else {
-      localStorage.removeItem(PARENT_MODE_KEY)
+    } else if (!isParentMode && isExit) {
+      localStorage.setItem(PARENT_MODE_KEY, "false")
+      setIsExitMode(false)
     }
   }, [isParentMode])
 
@@ -59,14 +63,15 @@ export function MissionList() {
     setMissions(
       missions.map((mission) => (mission.id === id ? { ...mission, completed: !mission.completed } : mission)),
     )
-
+    
     // Update stats optimistically
     const missionToToggle = missions.find((m) => m.id === id)
     if (missionToToggle) {
+      let point = missionToToggle.stars * 10
       if (missionToToggle.completed) {
-        setStats({ ...stats, completed: stats.completed - 1 })
+        setStats({ ...stats, completed: stats.completed - point, total: TOTAL_POINT })
       } else {
-        setStats({ ...stats, completed: stats.completed + 1 })
+        setStats({ ...stats, completed: stats.completed + point, total: TOTAL_POINT })
       }
     }
 
@@ -105,6 +110,7 @@ export function MissionList() {
 
   const handleExitParentMode = () => {
     setIsParentMode(false)
+    setIsExitMode(true)
   }
 
   if (isLoading) {

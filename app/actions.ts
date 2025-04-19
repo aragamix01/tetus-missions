@@ -20,7 +20,7 @@ export type Mission = {
 export async function getMissions(): Promise<Mission[]> {
   try {
     const missions = await sql<Mission[]>`
-      SELECT * FROM missions ORDER BY created_at DESC
+      SELECT * FROM missions ORDER BY stars ASC
     `
     return missions
   } catch (error) {
@@ -88,14 +88,13 @@ export async function getMissionStats(): Promise<{ completed: number; total: num
   try {
     const result = await sql`
       SELECT 
-        COUNT(*) as total,
-        COUNT(*) FILTER (WHERE completed = true) as completed
+        SUM(stars) FILTER (WHERE completed = true) as completed
       FROM missions
     `
-
+    
     return {
-      completed: Number.parseInt(result[0].completed as string) || 0,
-      total: Number.parseInt(result[0].total as string) || 0,
+      completed: Number.parseInt(result[0].completed as string) * 10 || 0,
+      total: 100,
     }
   } catch (error) {
     console.error("Failed to get mission stats:", error)

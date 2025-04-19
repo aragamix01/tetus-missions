@@ -15,7 +15,7 @@ export function ProgressBar({ value, maxValue }: ProgressBarProps) {
     <div className="mb-6 mt-2">
       <div className="flex justify-between mb-2">
         <span className="text-sm font-medium text-gray-400">Mission Progress</span>
-        <span className="text-sm font-medium text-purple-400">{percentage}% Complete</span>
+        <span className="text-sm font-medium text-purple-400">({percentage}/100) {percentage}% Complete</span>
       </div>
       <div className="h-4 bg-gray-800 rounded-full overflow-visible relative">
         {/* Progress bar */}
