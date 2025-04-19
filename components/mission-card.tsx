@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { StarRating } from "./star-rating"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, Circle, Trash2 } from "lucide-react"
-import type { Mission } from "@/app/actions"
-import { deleteMission } from "@/app/actions"
+import { useState } from "react";
+import { StarRating } from "./star-rating";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Circle, Trash2 } from "lucide-react";
+import type { Mission } from "@/app/actions";
+import { deleteMission } from "@/app/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,26 +22,31 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 interface MissionCardProps {
-  mission: Mission
-  onToggleCompletion: (id: number) => void
-  onDelete: (id: number) => void
-  isParentMode: boolean
+  mission: Mission;
+  onToggleCompletion: (id: number) => void;
+  onDelete: (id: number) => void;
+  isParentMode: boolean;
 }
 
-export function MissionCard({ mission, onToggleCompletion, onDelete, isParentMode }: MissionCardProps) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+export function MissionCard({
+  mission,
+  onToggleCompletion,
+  onDelete,
+  isParentMode,
+}: MissionCardProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    setIsDeleting(true)
-    await deleteMission(mission.id)
-    onDelete(mission.id)
-    setIsDeleting(false)
-    setIsDeleteDialogOpen(false)
-  }
+    setIsDeleting(true);
+    await deleteMission(mission.id);
+    onDelete(mission.id);
+    setIsDeleting(false);
+    setIsDeleteDialogOpen(false);
+  };
 
   return (
     <>
@@ -44,7 +55,9 @@ export function MissionCard({ mission, onToggleCompletion, onDelete, isParentMod
           <div className="flex-grow">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-bold">{mission.title}</CardTitle>
+                <CardTitle className="text-xl font-bold">
+                  {mission.title}
+                </CardTitle>
                 <div className="flex items-center gap-2">
                   {isParentMode && (
                     <Button
@@ -56,21 +69,35 @@ export function MissionCard({ mission, onToggleCompletion, onDelete, isParentMod
                       <Trash2 className="h-5 w-5" />
                     </Button>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full"
-                    onClick={() => onToggleCompletion(mission.id)}
-                  >
-                    {mission.completed ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-gray-500" />
-                    )}
-                  </Button>
+                  {isParentMode ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => onToggleCompletion(mission.id)}
+                    >
+                      {mission.completed ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-500" />
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                    >
+                      {mission.completed && (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
-              <CardDescription className="text-gray-400">{mission.description}</CardDescription>
+              <CardDescription className="text-gray-400">
+                {mission.description}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center">
@@ -82,19 +109,23 @@ export function MissionCard({ mission, onToggleCompletion, onDelete, isParentMod
           <div
             className={`w-2 ${
               mission.completed
-                ? "bg-gradient-to-b from-green-400 to-green-600"
+                ? "bg-gradient-to-b from-green-500 to-green-600"
                 : "bg-gradient-to-b from-purple-400 to-pink-500"
             }`}
           />
         </div>
       </Card>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent className="bg-gray-900 border-gray-800 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Mission</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
-              Are you sure you want to delete the mission "{mission.title}"? This action cannot be undone.
+              Are you sure you want to delete the mission "{mission.title}"?
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -112,5 +143,5 @@ export function MissionCard({ mission, onToggleCompletion, onDelete, isParentMod
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }
